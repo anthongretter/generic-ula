@@ -1,14 +1,14 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-entity bc is
+entity bc_mult is
     port (Reset, clk, inicio : in std_logic;
         A_zero, B_zero: in std_logic;
         pronto: out std_logic;
         carga_Entradas, carga_mult, mux_B, mux_mult: out std_logic);
-end bc;
+end bc_mult;
 
-architecture estrutura of bc is
+architecture estrutura of bc_mult is
 	type state_type is (S0, S1, S2, S3);
 	signal state: state_type;
 begin

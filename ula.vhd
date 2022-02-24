@@ -58,6 +58,10 @@ architecture arch of ula is
 			-- 1001: A * B
 			-- 1010: divisao inteira A/B
 			-- 1111: Halt??
+
+			-- COMENTÁRIO DO PROFESSOR NA AULA
+			-- o others da ula deve ser undefined: (others => 'U') when others;
+			-- para evitar latches inferidos
 			
 	saidaPQ <= zero
 	begin

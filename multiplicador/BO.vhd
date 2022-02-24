@@ -3,7 +3,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;  
 
-entity bo is
+entity bo_mult is
       generic (N : integer);
       port (
             clk : in std_logic;
@@ -11,8 +11,8 @@ entity bo is
             entA, entB : in std_logic_vector(N - 1 downto 0);
             Az, Bz: out std_logic;
             mult : out std_logic_vector(2*N - 1 downto 0)); 
-end bo;
-architecture estrutura of bo is
+end bo_mult;
+architecture estrutura of bo_mult is
 
       component registrador is
             generic (N : integer);

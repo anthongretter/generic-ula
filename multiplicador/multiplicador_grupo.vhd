@@ -12,14 +12,14 @@ end multiplicador_grupo;
 architecture arc of multiplicador_grupo is
     -- componentes (bo e bc)
 
-    component bc is
+    component bc_mult is
       port (Reset, clk, inicio : in std_logic;
       A_zero, B_zero: in std_logic;
       pronto: out std_logic;
       carga_Entradas, carga_mult, mux_B, mux_mult: out std_logic);
     end component;
 
-    component bo is
+    component bo_mult is
       generic (N : integer);
       port (
             clk : in std_logic;
@@ -39,7 +39,7 @@ begin
   -- port map (conexoes entre bloco de controle e bloco operativo)
 
      -- bloco de comando
-    CONTROLE : bc port map (
+    CONTROLE : bc_mult port map (
       Reset => Reset,
       clk => clk,
       inicio => inicio,
@@ -53,7 +53,7 @@ begin
     );
 
   -- bloco operativo
-    OPERATIVO : bo generic map (N => N) port map (
+    OPERATIVO : bo_mult generic map (N => N) port map (
             clk => clk,
             carga_Entradas => carga_Entradas, 
             mux_B => mux_B, 
