@@ -2,10 +2,10 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 
-entity tb_ula is
-end tb_ula;
+entity tb_ula_inicial is
+end tb_ula_inicial;
 
-architecture arch of tb_ula is
+architecture arch of tb_ula_inicial is
 	constant CLK_PERIOD: time := 15ns;
 	constant N: integer := 4;
 	signal clk, reset, pronto, inicio: std_logic := '0';
@@ -15,7 +15,7 @@ architecture arch of tb_ula is
 
 begin
 
-	UUT: entity work.ula
+	UUT: entity work.ula_inicial
 	port map (
 		clk => clk,
 		reset => reset,

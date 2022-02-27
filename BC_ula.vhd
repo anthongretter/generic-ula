@@ -1,0 +1,1 @@
+-- bloco de controle ula;; enA, enB, enPC, enOut, opcode, etc.

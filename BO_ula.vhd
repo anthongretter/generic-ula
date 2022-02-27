@@ -1,0 +1,1 @@
+-- contem: regpc, mem_dados, regA, regB, regOP; ula inicial, regpq, regs, regz.
