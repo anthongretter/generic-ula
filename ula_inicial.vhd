@@ -2,7 +2,6 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
-use.ieee.numeric_std;
 
 
 entity ula_inicial is
@@ -25,25 +24,25 @@ architecture arch of ula_inicial is
 			pronto: out std_logic);
 	end component;
 	
-	component subtrator-sinal is
+	component subtrator_sinal is
       generic (N: integer);
-      port (A, B: in signed(N-1 downto 0);
-            S: out signed(N-1 downto 0));
+      port (A, B: in std_logic_vector(N-1 downto 0);
+            S: out std_logic_vector(N-1 downto 0));
 	end component;
 	
-	component somador-sinal is
+	component somador_sinal is
     generic(N: integer);
-		port(A, B: in signed(N-1 downto 0);
-		S: out signed(N-1 downto 0));
+		port(A, B: in std_logic_vector(N-1 downto 0);
+		S: out std_logic_vector(N-1 downto 0));
 	end component;
 	
-	signal multSaidaSig: std_logic_vector(2*N-1 downto 0);
-	signal saidaSoma: signed(N-1 downto 0);
-	signal saidaSub: signed(N-1 downto 0);
-	signal um: signed(N-2 downto 0) := (others => '0');
+	signal multSaidaSig: std_logic_vector((2*N)-1 downto 0);
+	signal saidaSoma: std_logic_vector(N-1 downto 0);
+	signal saidaSub: std_logic_vector(N-1 downto 0);
+	signal um: std_logic_vector(N-2 downto 0) := (others => '0');
 	signal zero: std_logic_vector(N-1 downto 0) := (others => '0');
-	signal saidaIncremento: signed(N-1 downto 0);
-	signal saidaDecremento: signed(N-1 downto 0);
+	signal saidaIncremento: std_logic_vector(N-1 downto 0);
+	signal saidaDecremento: std_logic_vector(N-1 downto 0);
 	
 	
 			-- 0000: no operation
@@ -63,7 +62,6 @@ architecture arch of ula_inicial is
 			-- o others da ula deve ser undefined: (others => 'U') when others;
 			-- para evitar latches inferidos
 			
-	saidaPQ <= zero
 	begin
 		with op select
 			saidaS <= zero when "0000",
@@ -71,15 +69,18 @@ architecture arch of ula_inicial is
 					saidaSub when "0010",
 					saidaIncremento when "0011",
 					saidaDecremento when "0100",
-					not A when "0101",
+					not entradaA when "0101",
 					entradaA and entradaB when "0110",
 					entradaA or entradaB when "0111",
 					entradaA xor entradaB when "1000",
-					multSaidaSig[N/2 to 0] when "1001",
+					multSaidaSig(N-1 downto 0) when "1001",
 					zero when others;
-			saidaPQ <= multSaidaSig[N-1 to N/2] when "1001",
+		with op select
+			saidaPQ <= multSaidaSig((2*N)-1 downto N) when "1001",
+						zero when others;
+			
 	-- somador COM SINAL
-	somaEntradas: somador-sinal generic map(N => N)
+	somaEntradas: somador_sinal generic map(N => N)
 	port map(
 		A => entradaA,
 		B => entradaB,
@@ -87,7 +88,7 @@ architecture arch of ula_inicial is
 		);
 			
 	-- subtrator COM SINAL
-	subtraiEntradas: subtrator-sinal generic map(N => N)
+	subtraiEntradas: subtrator_sinal generic map(N => N)
 	port map(
 		A => entradaA,
 		B => entradaB,
@@ -95,18 +96,18 @@ architecture arch of ula_inicial is
 		);
 	
 	-- incrementa
-	incremento: somador-sinal generic map(N => N)
+	incremento: somador_sinal generic map(N => N)
 	port map(
 		A => entradaA,
-		B => um&'1'
+		B => um&'1',
 		S => saidaIncremento
 		);
 		
 	-- decrementa
-	decremento: subtrator-sinal generic map(N => N)
+	decremento: subtrator_sinal generic map(N => N)
 	port map(
 		A => entradaA,
-		B => um&'1'
+		B => um&'1',
 		S => saidaDecremento
 		);
 	
