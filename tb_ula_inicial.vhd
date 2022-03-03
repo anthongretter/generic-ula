@@ -8,7 +8,7 @@ end tb_ula_inicial;
 architecture arch of tb_ula_inicial is
 	constant CLK_PERIOD: time := 15ns;
 	constant N: integer := 4;
-	signal clk, reset, pronto, inicio: std_logic := '0';
+	signal clk, reset, pronto, inicio, flag_OVF, flag_Z, flag_N: std_logic := '0';
 	signal entradaA, entradaB, saidaPQ, saidaS: std_logic_vector(N-1 downto 0);
 	signal op: std_logic_vector(3 downto 0);
 
@@ -24,8 +24,10 @@ begin
 		op => op,
 		pronto => pronto,
 		saidaPQ => saidaPQ,
-		saidaS => saidaS
-	);
+		saidaS => saidaS,
+		flag_OVF => flag_OVF,
+		flag_Z => flag_Z,
+		flag_N => flag_N);
 	
 	-- clock
 	clk <= not clk after CLK_PERIOD;
@@ -46,7 +48,7 @@ begin
 	entradaA <= "1111", 
 	"0010" after 30 ns, -- comeca soma 1, deve dar 0101
 	"0011" after 60 ns, -- soma com signal (3 - 4), resultado deve ser 1111 (-1 em c2)
-	"1111" after 90 ns, -- CASO OVERFLOW (ainda nao implementado. uma flag é a melhor saida)
+	"0111" after 90 ns, -- CASO OVERFLOW (ainda nao implementado. uma flag é a melhor saida)
 	"0011" after 120 ns, --- COMECA SUBTRAAO, 3-1 = 2
   "0011" after 150 ns, --- SUBTRACAO CASO 3 - (-1) = 4
 	"1001" after 180 ns, --- caso overflow, nao implementado.
@@ -61,7 +63,7 @@ begin
 	entradaB <= "1111", 
 	"0011" after 30 ns, -- comeca soma
 	"1100" after 60 ns, -- soma com signal
-	"1111" after 90 ns, -- caso overflow
+	"0010" after 90 ns, -- caso overflow
 	"0001" after 120 ns, -- SUBTRACAO 3 - 1
 	"1111" after 150 ns, -- subtbracao c numero neg
 	"0010" after 180 ns, -- caso overflow, nao implementado.

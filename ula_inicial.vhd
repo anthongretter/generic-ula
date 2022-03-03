@@ -9,7 +9,7 @@ entity ula_inicial is
 	port(clk, reset, inicio: in std_logic;
 		entradaA, entradaB: in std_logic_vector(N-1 downto 0);
 		op: in std_logic_vector(3 downto 0);
-		pronto: out std_logic;
+		pronto, flag_OVF, flag_Z, flag_N: out std_logic;
 		saidaPQ: out std_logic_vector(N-1 downto 0);
 		saidaS: out std_logic_vector(N-1 downto 0));
 end ula_inicial;
@@ -27,13 +27,15 @@ architecture arch of ula_inicial is
 	component subtrator_sinal is
       generic (N: integer);
       port (A, B: in std_logic_vector(N-1 downto 0);
-            S: out std_logic_vector(N-1 downto 0));
+            S: out std_logic_vector(N-1 downto 0);
+				OVF: out std_logic);
 	end component;
 	
 	component somador_sinal is
-    generic(N: integer);
-		port(A, B: in std_logic_vector(N-1 downto 0);
-		S: out std_logic_vector(N-1 downto 0));
+		generic (N : integer);
+	port(A, B: in std_logic_vector(N-1 downto 0);
+		S: out std_logic_vector(N-1 downto 0);
+		OVF: out std_logic);
 	end component;
 	
 	component mux2para1 is
@@ -44,9 +46,10 @@ architecture arch of ula_inicial is
 	end component;
 	
 	signal multSaidaSig: std_logic_vector((2*N)-1 downto 0);
-	signal saidaSoma, saiMuxEntradaB, saidaSub: std_logic_vector(N-1 downto 0);
+	signal saidaSoma, saiMuxEntradaB, saidaSub, saidaS_sig, saidaPQ_sig: std_logic_vector(N-1 downto 0);
 	signal um: std_logic_vector(N-2 downto 0) := (others => '0');
 	signal zero: std_logic_vector(N-1 downto 0) := (others => '0');
+	signal ovfSoma, ovfSub: std_logic := '0';
 	
 	
 			-- 0000: no operation
@@ -68,7 +71,7 @@ architecture arch of ula_inicial is
 			
 	begin
 		with op select
-			saidaS <= zero when "0000",
+			saidaS_sig <= zero when "0000",
 					saidaSoma when "0001",
 					saidaSub when "0010",
 					saidaSoma when "0011",
@@ -80,15 +83,28 @@ architecture arch of ula_inicial is
 					multSaidaSig(N-1 downto 0) when "1001",
 					zero when others;
 		with op select
-			saidaPQ <= multSaidaSig((2*N)-1 downto N) when "1001",
+			saidaPQ_sig <= multSaidaSig((2*N)-1 downto N) when "1001",
 						zero when others;
+			with op select
+			flag_OVF <= ovfSub when "0010",
+					ovfSub when "0100",
+					ovfSoma when "0001",
+					ovfSoma when "0011",
+					'0' when others;	
 			
+	flag_Z <= '1' when (saidaS_sig = zero) and (saidaPQ_sig = zero) else '0';
+	flag_N <= saidaS_sig(N-1); -- desativar isso em mult e div?
+	
+	saidaS <= saidaS_sig;
+	saidaPQ <= saidaPQ_sig;
+	
 	-- somador COM SINAL
 	somaEntradas: somador_sinal generic map(N => N)
 	port map(
 		A => entradaA,
 		B => saiMuxEntradaB,
-		S => saidaSoma
+		S => saidaSoma,
+		OVF => ovfSoma
 		);
 			
 	-- subtrator COM SINAL
@@ -96,7 +112,8 @@ architecture arch of ula_inicial is
 	port map(
 		A => entradaA,
 		B => saiMuxEntradaB,
-		S => saidaSub
+		S => saidaSub,
+		OVF => ovfSub
 		);
 	
 	
