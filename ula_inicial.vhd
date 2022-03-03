@@ -36,13 +36,17 @@ architecture arch of ula_inicial is
 		S: out std_logic_vector(N-1 downto 0));
 	end component;
 	
+	component mux2para1 is
+	generic (N : integer);
+	PORT ( a, b : IN STD_LOGIC_VECTOR(N-1 DOWNTO 0);
+        sel: IN STD_LOGIC;
+        y : OUT STD_LOGIC_VECTOR(N-1 DOWNTO 0));
+	end component;
+	
 	signal multSaidaSig: std_logic_vector((2*N)-1 downto 0);
-	signal saidaSoma: std_logic_vector(N-1 downto 0);
-	signal saidaSub: std_logic_vector(N-1 downto 0);
+	signal saidaSoma, saiMuxEntradaB, saidaSub: std_logic_vector(N-1 downto 0);
 	signal um: std_logic_vector(N-2 downto 0) := (others => '0');
 	signal zero: std_logic_vector(N-1 downto 0) := (others => '0');
-	signal saidaIncremento: std_logic_vector(N-1 downto 0);
-	signal saidaDecremento: std_logic_vector(N-1 downto 0);
 	
 	
 			-- 0000: no operation
@@ -67,8 +71,8 @@ architecture arch of ula_inicial is
 			saidaS <= zero when "0000",
 					saidaSoma when "0001",
 					saidaSub when "0010",
-					saidaIncremento when "0011",
-					saidaDecremento when "0100",
+					saidaSoma when "0011",
+					saidaSub when "0100",
 					not entradaA when "0101",
 					entradaA and entradaB when "0110",
 					entradaA or entradaB when "0111",
@@ -83,7 +87,7 @@ architecture arch of ula_inicial is
 	somaEntradas: somador_sinal generic map(N => N)
 	port map(
 		A => entradaA,
-		B => entradaB,
+		B => saiMuxEntradaB,
 		S => saidaSoma
 		);
 			
@@ -91,25 +95,20 @@ architecture arch of ula_inicial is
 	subtraiEntradas: subtrator_sinal generic map(N => N)
 	port map(
 		A => entradaA,
-		B => entradaB,
+		B => saiMuxEntradaB,
 		S => saidaSub
 		);
 	
-	-- incrementa
-	incremento: somador_sinal generic map(N => N)
+	
+	-- entradaB quando 0 e um quando 1
+	muxEntradaB: mux2para1 generic map(N => N)
 	port map(
-		A => entradaA,
-		B => um&'1',
-		S => saidaIncremento
-		);
-		
-	-- decrementa
-	decremento: subtrator_sinal generic map(N => N)
-	port map(
-		A => entradaA,
-		B => um&'1',
-		S => saidaDecremento
-		);
+		a => entradaB,
+		b => um&'1',
+		sel => op(2) or (op(1) and op(0)),
+		y => saiMuxEntradaB
+	);
+	
 	
 	
 	-- multiplicador
