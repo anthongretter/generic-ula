@@ -33,6 +33,13 @@ PORT (clk, reset, carga : IN STD_LOGIC;
 	  q : OUT STD_LOGIC_VECTOR(N-1 DOWNTO 0));
 END component;
 
+component regPC IS
+generic (addr_bits : integer: = 4);
+PORT (clk, reset, carga : IN STD_LOGIC;
+	  d : IN STD_LOGIC_VECTOR(addr_bits-1 DOWNTO 0);
+	  q : OUT STD_LOGIC_VECTOR(addr_bits-1 DOWNTO 0));
+END component;
+
 component memoriaROM is
       generic(
           addr_width : integer := 16; -- quantidade de elementos a guardar
@@ -45,14 +52,21 @@ component memoriaROM is
   );
   end component;
 
--- falta: regPC. fazer estes dois componentes
 -- signals
 signal entradaA, entradaB, saidaPQ_sig, saidaS_sig, saidaMem_dados: std_logic_vector(N-1 downto 0);
 signal flag_OVF_sig, flag_Z_sig, flag_N_sig: std_logic;
 signal opcode_ula: std_logic_vector(N-1 downto 0);
+signal count_RegPC: std_logic_vector(3 downto 0); -- organizar generics, é addr bit, fazer um geralzao
 
 
 begin
+
+      regPC: regPC generic map(N => 4)
+      port map (
+            d => count_RegPC,
+            q => count_RegPC
+      );
+
       regA: registrador_r generic map(N => N)
       port map(
             clk => clk,
@@ -143,7 +157,7 @@ begin
 
       memoria_dados: memoriaRom
       port map (
-            addr => saida_RegPC,
+            addr => count_RegPC,
             data => saidaMem_dados
       );
 
