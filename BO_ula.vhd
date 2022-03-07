@@ -33,9 +33,21 @@ PORT (clk, reset, carga : IN STD_LOGIC;
 	  q : OUT STD_LOGIC_VECTOR(N-1 DOWNTO 0));
 END component;
 
--- falta: mem_dados, regPC. fazer estes dois componentes
+component memoriaROM is
+      generic(
+          addr_width : integer := 16; -- quantidade de elementos a guardar
+          addr_bits  : integer := 4; -- tamanho de bits da contagem (que vem de REGPC)
+          data_width : integer := 8 -- numero de bits do elemento
+          );
+  port(
+      addr : in std_logic_vector(addr_bits-1 downto 0);
+      data : out std_logic_vector(data_width-1 downto 0)
+  );
+  end component;
+
+-- falta: regPC. fazer estes dois componentes
 -- signals
-signal entradaA, entradaB, saidaPQ_sig, saidaS_sig: std_logic_vector(N-1 downto 0);
+signal entradaA, entradaB, saidaPQ_sig, saidaS_sig, saidaMem_dados: std_logic_vector(N-1 downto 0);
 signal flag_OVF_sig, flag_Z_sig, flag_N_sig: std_logic;
 signal opcode_ula: std_logic_vector(N-1 downto 0);
 
@@ -46,7 +58,7 @@ begin
             clk => clk,
             reset => reset,
             carga => enA,
-            d =>, --- mem_dados
+            d => saidaMem_dados, 
             q => entradaA
       );
 
@@ -55,7 +67,7 @@ begin
             clk => clk,
             reset => reset,
             carga => enB,
-            d =>, --- mem_dados
+            d => saidaMem_dados,
             q => entradaB
       );
 
@@ -64,7 +76,7 @@ begin
             clk => clk,
             reset => reset,
             carga => enOp,
-            d => --mem_dados
+            d => saidaMem_dados,
             q => opcode_ula
       );
 
@@ -128,5 +140,12 @@ begin
             d => flag_N_sig,
             q => flag_N
       );
+
+      memoria_dados: memoriaRom
+      port map (
+            addr => saida_RegPC,
+            data => saidaMem_dados
+      );
+
 -- port maps e atribuicoes
 end estrutura;
