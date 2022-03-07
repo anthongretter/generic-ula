@@ -9,16 +9,16 @@ entity BO_ula is
       generic (N : integer);
       port (
             clk : in std_logic;
-            opcode, enPC, enA, enB, enOut, reset, inicio: in std_logic;
-            pronto, flag_Z, flag_OVF, flag_N: out in std_logic;
-            PQ, S: std_logic_vector(N-1 downto 0)); 
+            enPC, enA, enB, enOut, enOp, reset: in std_logic;
+            pronto, flag_Z, flag_OVF, flag_N: out std_logic;
+            PQ, S, opcode: out std_logic_vector(N-1 downto 0)); 
 end BO_ula;
 architecture estrutura of BO_ula is
 
 -- componentes
 component ula_inicial is
 	generic(N: INTEGER);
-	port(clk, reset, inicio: in std_logic;
+	port(clk, reset: in std_logic;
 		entradaA, entradaB: in std_logic_vector(N-1 downto 0);
 		op: in std_logic_vector(3 downto 0);
 		pronto, flag_OVF, flag_Z, flag_N: out std_logic;
@@ -37,7 +37,7 @@ END component;
 -- signals
 signal entradaA, entradaB, saidaPQ_sig, saidaS_sig: std_logic_vector(N-1 downto 0);
 signal flag_OVF_sig, flag_Z_sig, flag_N_sig: std_logic;
-signal opcode_ula: std_logic_vector(3 downto 0);
+signal opcode_ula: std_logic_vector(N-1 downto 0);
 
 
 begin
@@ -64,7 +64,7 @@ begin
             clk => clk,
             reset => reset,
             carga => enOp,
-            d => opcode,
+            d => --mem_dados
             q => opcode_ula
       );
 
@@ -72,10 +72,9 @@ begin
       port map(
             clk => clk,
             reset => reset, --- o que isso ffaz?
-            inicio => inicio, ---?
             entradaA => entradaA, -- vem de mem dados
             entradaB => entradaB,
-            op => opcode_ula,
+            op => opcode_ula(3 downto 0),
             pronto => pronto,
             flag_OVF => flag_OVF_sig,
             flag_Z => flag_Z_sig,

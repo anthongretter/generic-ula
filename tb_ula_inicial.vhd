@@ -8,7 +8,7 @@ end tb_ula_inicial;
 architecture arch of tb_ula_inicial is
 	constant CLK_PERIOD: time := 15ns;
 	constant N: integer := 4;
-	signal clk, reset, pronto, inicio, flag_OVF, flag_Z, flag_N: std_logic := '0';
+	signal clk, reset, pronto, flag_OVF, flag_Z, flag_N: std_logic := '0';
 	signal entradaA, entradaB, saidaPQ, saidaS: std_logic_vector(N-1 downto 0);
 	signal op: std_logic_vector(3 downto 0);
 
@@ -17,8 +17,6 @@ begin
 	UUT: entity work.ula_inicial
 	port map (
 		clk => clk,
-		reset => reset,
-		inicio => inicio,
 		entradaA => entradaA,
 		entradaB => entradaB, 
 		op => op,
@@ -42,7 +40,6 @@ begin
 	-- inicio: entra no mult para saber se ele deve começar o processo, também, então ele deve ser 1 só no caso da multiplicacao. PROVAVELMENTE, vou ter que dividir em inicio_mult e inicio_div, já que os dois tem máquina de estados, e esses valores vão ser pegos... do opcode? análise futura. a lógica atual aqui nesse tb é iniciar quando pronto é 1 porque pronto só é um no s0 do mult; ver isso também...
 	-- mas o bc desse projeto só controla enables de A e B na ula. talvez adaptar pra quando o opcode for de mult inserir um inicio especifico na entradamult, base de signal? pensamentos futuros...
 
-	inicio <= '1' after 440 ns;
 	-- entradas. 
 	-- lembrete: 4 bits alcanca [-8,7], sendo 7 0111 e -8 1000
 	entradaA <= "1111", 
