@@ -1,4 +1,3 @@
--- contem: regpc, mem_dados, regA, regB, regOP; ula inicial, regpq, regs, regz.
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -37,11 +36,18 @@ PORT (clk, reset, carga : IN STD_LOGIC;
 END component;
 
 component regPC IS
-generic (addr_bits: integer);
+generic (N: integer);
 PORT (clk, reset, carga : IN STD_LOGIC;
-	  d : IN STD_LOGIC_VECTOR(addr_bits-1 DOWNTO 0);
-	  q : OUT STD_LOGIC_VECTOR(addr_bits-1 DOWNTO 0));
+	  d : IN STD_LOGIC_VECTOR(N-1 DOWNTO 0);
+	  q : OUT STD_LOGIC_VECTOR(N-1 DOWNTO 0));
 END component;
+
+component registrador_r_signal IS
+PORT (clk, reset, carga : IN STD_LOGIC;
+	  d : in std_logic;
+	  q : out std_logic);
+end component;
+
 
 component memoriaROM is
       generic(
@@ -63,9 +69,11 @@ signal count_RegPC: std_logic_vector(addr_bits-1 downto 0);
 
 
 begin
-
-      regPC: regPC generic map(N => addr_bits)
+      reg_PC: regPC generic map(N => addr_bits)
       port map (
+				clk => clk,
+				reset => reset,
+				carga => enPC,
             d => count_RegPC,
             q => count_RegPC
       );
@@ -131,7 +139,7 @@ begin
             q => S
       );
 
-      regZ: registrador_r generic map(N => N)
+      regZ: registrador_r_signal
       port map(
             clk => clk,
             reset => reset,
@@ -140,7 +148,7 @@ begin
             q => flag_Z
       );
 
-      regOVF: registrador_r generic map(N => N)
+      regOVF: registrador_r_signal
       port map(
             clk => clk,
             reset => reset,
@@ -149,7 +157,7 @@ begin
             q => flag_OVF
       );
 
-      regN: registrador_r generic map(N => N)
+      regN: registrador_r_signal
       port map(
             clk => clk,
             reset => reset,
@@ -159,8 +167,8 @@ begin
       );
 
       memoria_dados: memoriaRom generic map(
-            addr_width => addr_width; -- quantidade de elementos a guardar
-            addr_bits => addr_bits; -- tamanho de bits da contagem (que vem de REGPC)
+            addr_width => addr_width, -- quantidade de elementos a guardar
+            addr_bits => addr_bits, -- tamanho de bits da contagem (que vem de REGPC)
             data_width => data_width
       )
       port map (

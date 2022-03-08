@@ -11,7 +11,7 @@ end BC_final;
 architecture estrutura of BC_final is
 	type state_type is (S0, S1, S2, S3, S4, S5, Halt);
 	signal state: state_type;
-  signal opcode_salvo: std_logic_vector (3 downto 0);
+	signal opcode_salvo: std_logic_vector (3 downto 0);
 begin
     -- máquina de estados
     process(Reset, clk)
@@ -22,23 +22,22 @@ begin
         case state is
           -- checa halt, salva opcode em nova variavel.
           when S0 =>
-            if (opcode_mem = '1111') then -- OP HALT
+            if (opcode_mem = "1111") then -- OP HALT
               state <= Halt;
             else
               state <= S1;
             end if;
- =
           -- enA
           when S1 => 
-              if opcode_salvo = '0000' then -- NO OPERATION
+              if opcode_salvo = "0000" then -- NO OPERATION
                 state <= S0;
-              elsif opcode_salvo = '0011' or opcode_salvo = '0100' or opcode_salvo = '0101' then -- TODAS OPERACOES QUE NAO PRECISAM DE B
+              elsif opcode_salvo = "0011" or opcode_salvo = "0100" or opcode_salvo = "0101" then -- TODAS OPERACOES QUE NAO PRECISAM DE B
                 state <= S3; -- operacoes monociclo
               end if;
 
           -- enableB
           when S2 =>
-              if opcode_salvo = '1001' or opcode_salvo = '1010' then --div ou mult
+              if opcode_salvo = "1001" or opcode_salvo = "1010" then --div ou mult
                 state <= S4;
               else
                 state <= S3;
@@ -60,8 +59,6 @@ begin
 
           when Halt =>
                 state <= Halt; -- única maneira de sair do halt é reset externo
-
-
         end case;
       end if;
     end process;
@@ -82,7 +79,7 @@ begin
           reset_bo <= '0';
 
 
-        when S1 = --enableA
+        when S1 => --enableA
           enPC <= '0';
           enA <= '1';
           enB <= '0';

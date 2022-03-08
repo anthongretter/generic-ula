@@ -3,15 +3,15 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-entity projeto_final is
+entity projeto is
   generic(N: integer := 8; --mesmo que data_width
     addr_width : integer := 16; -- quantidade de elementos a guardar
     addr_bits  : integer := 4); -- tamanho de bits da contagem (que vem de REGPC))
   port (clk, Reset: in std_logic;
         PQ, S: out std_logic_vector(N-1 downto 0));
-end projeto_final;
+end projeto;
 
-architecture arc of projeto_final is
+architecture arc of projeto is
 
   component BO_final is
     generic (N : integer;
@@ -40,7 +40,7 @@ architecture arc of projeto_final is
 begin 
     BO: BO_final generic map (N => N, 
     data_width => N,
-    addr_width => addr_width; -- quantidade de elementos a guardar
+    addr_width => addr_width, -- quantidade de elementos a guardar
     addr_bits  => addr_bits)
     port map(
       -- entradas
@@ -77,3 +77,5 @@ begin
       enOp => enOp_sig,
       reset_bo => reset_bo_sig
     );
+	 
+end arc;
