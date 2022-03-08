@@ -3,13 +3,13 @@ use ieee.std_logic_1164.all;
 
 entity bc_div is
     port (Reset, clk, inicio : in std_logic;
-        A_zero, B_zero: in std_logic;
-        pronto: out std_logic;
-        carga_Entradas, carga_mult, mux_B, mux_mult: out std_logic);
+        index_zero, divisor_zero, resto_maiorigual: in std_logic;
+        carga_entradas, carga_quociente, reset_saidas: out std_logic;
+        pronto, erro: out std_logic);
 end bc_div;
 
 architecture estrutura of bc_div is
-	type state_type is (S0, S1, S2, S3);
+	type state_type is (S0, S1, S2, S3, E);
 	signal state: state_type;
 begin
     -- máquina de estados
@@ -27,21 +27,34 @@ begin
               else
                 state <= S1;
               end if;
-          
+
+          -- estado de erro (divisões por 0)
+          when E =>
+              if (inicio = '0') then
+                state <= S0;
+              else
+                state <= S1;
+              end if;
+
           -- estado de setup
           when S1 => 
               state <= S2;
 
-
+          -- estado de check e incremento do resto
           when S2 =>
-              if (B_zero = '1' or A_zero = '1') then
+              if (index_zero = '1') then
                 state <= S0;
-              else
+              elsif (divisor_zero = '1') then
+                state <= E;
+              elsif (resto_maiorigual = '1') then
                 state <= S3;
+              else
+                state <= S2;
               end if;
           
+          -- estado de incremento do quociente e redução do resto
           when S3 =>
-                state <= S2;
+              state <= S2;
 
         end case;
       end if;
@@ -55,29 +68,28 @@ begin
 
         when S0 =>
           pronto <= '1';
-			 carga_mult <= '0';
+          erro <= '0';
+
+        when E =>
+          pronto <= '1';
+          erro <= '1';
 
         when S1 =>
-          mux_mult <= '1';      -- reseta multiplicação
-          mux_B <= '1';         -- B recebe entB
-          carga_Entradas <= '1';  -- atualiza os valores de A e B (entA e entB)
-          carga_mult <= '1';      -- atualiza valor da multiplicacao (reseta valor)
+          reset_saidas <= '1';      -- reseta saidas (quociente e resto)
+          carga_entradas <= '1';    -- atualiza os valores de A e B (entA e entB)
+          carga_quociente <= '1';   -- atualiza valor do quociente (reseta valor)
           pronto <= '0';
-          -- definindo valores iniciais arbitrarios:
-			 
 
         when S2 =>
-          mux_B <= '0';         -- B passa a receber valor da subtração
-          carga_Entradas <= '0';  -- mantem os valores de A e B (checa A = 0)
-          carga_mult <= '0';
-			    mux_mult <= '0';      -- regmult recebe a soma
+          reset_saidas <= '0';      -- mantem saidas
+          carga_entradas <= '0';    -- mantem os valores de dividendo e divisor
+          carga_quociente <= '0';   -- mantem valor do quociente
           pronto <= '0';
 
         when S3 =>
-          carga_Entradas <= '1';  -- mantem os valores de A e B (checa B = 0)
-          mux_B <= '0';
-          carga_mult <= '1';
-			    mux_mult <= '0';      -- regmult recebe a soma
+          reset_saidas <= '0';
+          carga_entradas <= '0';
+          carga_quociente <= '1';   -- atualiza valor do quociente
           pronto <= '0';
 
 		  end case;
