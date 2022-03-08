@@ -6,7 +6,7 @@ use ieee.std_logic_unsigned.all;
 
 entity ula_inicial is
 	generic(N: INTEGER := 4);
-	port(clk, reset, inicio: in std_logic;
+	port(clk, reset: in std_logic;
 		entradaA, entradaB: in std_logic_vector(N-1 downto 0);
 		op: in std_logic_vector(3 downto 0);
 		pronto, flag_OVF, flag_Z, flag_N: out std_logic;
@@ -49,7 +49,7 @@ architecture arch of ula_inicial is
 	signal saidaSoma, saiMuxEntradaB, saidaSub, saidaS_sig, saidaPQ_sig: std_logic_vector(N-1 downto 0);
 	signal um: std_logic_vector(N-2 downto 0) := (others => '0');
 	signal zero: std_logic_vector(N-1 downto 0) := (others => '0');
-	signal ovfSoma, ovfSub: std_logic := '0';
+	signal ovfSoma, ovfSub, inicia_mult: std_logic := '0';
 	
 	
 			-- 0000: no operation
@@ -85,12 +85,15 @@ architecture arch of ula_inicial is
 		with op select
 			saidaPQ_sig <= multSaidaSig((2*N)-1 downto N) when "1001",
 						zero when others;
-			with op select
+		with op select -- qual sinal de ovf eu quero
 			flag_OVF <= ovfSub when "0010",
 					ovfSub when "0100",
 					ovfSoma when "0001",
 					ovfSoma when "0011",
-					'0' when others;	
+					'0' when others;
+			with op select 
+				inicia_mult <= '1' when "1001",
+				'0' when others;
 			
 	flag_Z <= '1' when (saidaS_sig = zero) and (saidaPQ_sig = zero) else '0';
 	flag_N <= saidaS_sig(N-1); -- desativar isso em mult e div?
@@ -133,7 +136,7 @@ architecture arch of ula_inicial is
 		port map (
 			clk => clk,
 			reset => reset,
-			inicio => inicio,
+			inicio => inicia_mult,
 			pronto => pronto,
 			entA => entradaA,
 			entB => entradaB,
