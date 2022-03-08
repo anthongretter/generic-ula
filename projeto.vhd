@@ -8,7 +8,9 @@ entity projeto is
     addr_width : integer := 16; -- quantidade de elementos a guardar
     addr_bits  : integer := 4); -- tamanho de bits da contagem (que vem de REGPC))
   port (clk, Reset: in std_logic;
-        PQ, S: out std_logic_vector(N-1 downto 0));
+        PQ, S, mem_dados, A, B: out std_logic_vector(N-1 downto 0);
+		  flagZ, flagN, flagOVF : out std_logic;
+		  opcode: out std_logic_vector(3 downto 0));
 end projeto;
 
 architecture arc of projeto is
@@ -22,12 +24,12 @@ architecture arc of projeto is
           clk : in std_logic;
           enPC, enA, enB, enOut, enOp, reset: in std_logic;
           pronto, flag_Z, flag_OVF, flag_N: out std_logic;
-          PQ, S, opcode: out std_logic_vector(N-1 downto 0)); 
+           PQ, S, opcode, mem_dados, A, B: out std_logic_vector(N-1 downto 0)); 
   end component;
 
   component BC_final is
     port (clk, Reset: in std_logic;
-          opcode_mem: in std_logic_vector(3 downto 0);
+          opcode: in std_logic_vector(3 downto 0);
           pronto: in std_logic;
           enPC, enA, enB, enOut, enOp, reset_bo: out std_logic);
   end component;
@@ -59,7 +61,10 @@ begin
       flag_N => flag_N_sig,
       PQ => PQ,
       S => S,
-      opcode => opcode_8bit
+      opcode => opcode_8bit,
+		mem_dados => mem_dados,
+		A => A,
+		B => B
     );
 
     BC: BC_final
@@ -67,7 +72,7 @@ begin
       --entradas
       clk => clk,
       Reset => Reset,
-      opcode_mem => opcode_8bit(3 downto 0),
+      opcode => opcode_8bit(3 downto 0),
       pronto => pronto_sig,
       -- saidas
       enPC => enPC_sig,
@@ -77,5 +82,9 @@ begin
       enOp => enOp_sig,
       reset_bo => reset_bo_sig
     );
-	 
+
+flagZ <= flag_Z_sig;
+flagN <= flag_N_sig;
+flagOVF <= flag_OVF_sig;
+opcode <= opcode_8bit(3 downto 0);
 end arc;

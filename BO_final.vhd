@@ -13,7 +13,7 @@ entity BO_final is
             clk : in std_logic;
             enPC, enA, enB, enOut, enOp, reset: in std_logic;
             pronto, flag_Z, flag_OVF, flag_N: out std_logic;
-            PQ, S, opcode: out std_logic_vector(N-1 downto 0)); 
+            PQ, S, opcode, mem_dados, A, B: out std_logic_vector(N-1 downto 0)); 
 end BO_final;
 architecture estrutura of BO_final is
 
@@ -176,5 +176,9 @@ begin
             data => saidaMem_dados
       );
 
+		opcode <= opcode_ula;
+		mem_dados <= saidaMem_dados;
+		A <= entradaA;
+		B <= entradaB;
 -- port maps e atribuicoes
 end estrutura;
