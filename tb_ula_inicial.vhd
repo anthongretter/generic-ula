@@ -18,7 +18,8 @@ begin
 	port map (
 		clk => clk,
 		entradaA => entradaA,
-		entradaB => entradaB, 
+		entradaB => entradaB,
+		reset => reset,
 		op => op,
 		pronto => pronto,
 		saidaPQ => saidaPQ,
