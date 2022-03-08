@@ -5,7 +5,7 @@ use ieee.std_logic_unsigned.all;
 
 
 entity ula_inicial is
-	generic(N: INTEGER := 4);
+	generic(N: INTEGER);
 	port(clk, reset: in std_logic;
 		entradaA, entradaB: in std_logic_vector(N-1 downto 0);
 		op: in std_logic_vector(3 downto 0);

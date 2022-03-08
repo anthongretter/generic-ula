@@ -1,1 +1,0 @@
--- arquivo que juntara BO e BC de ula, com saidas PQ, S e flagZ.

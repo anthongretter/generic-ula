@@ -14,7 +14,7 @@ architecture arch of tb_ula_inicial is
 
 begin
 
-	UUT: entity work.ula_inicial
+	UUT: entity work.ula_inicial generic map(N => N)
 	port map (
 		clk => clk,
 		entradaA => entradaA,

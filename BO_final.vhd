@@ -5,15 +5,18 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;  
 
-entity BO_ula is
-      generic (N : integer);
+entity BO_final is
+      generic (N : integer;
+      data_width : integer; -- numero de bits do elemento, igual a N
+      addr_width : integer; -- quantidade de elementos a guardar
+      addr_bits  : integer); -- tamanho de bits da contagem (que vem de REGPC)
       port (
             clk : in std_logic;
             enPC, enA, enB, enOut, enOp, reset: in std_logic;
             pronto, flag_Z, flag_OVF, flag_N: out std_logic;
             PQ, S, opcode: out std_logic_vector(N-1 downto 0)); 
-end BO_ula;
-architecture estrutura of BO_ula is
+end BO_final;
+architecture estrutura of BO_final is
 
 -- componentes
 component ula_inicial is
@@ -34,7 +37,7 @@ PORT (clk, reset, carga : IN STD_LOGIC;
 END component;
 
 component regPC IS
-generic (addr_bits : integer: = 4);
+generic (addr_bits: integer);
 PORT (clk, reset, carga : IN STD_LOGIC;
 	  d : IN STD_LOGIC_VECTOR(addr_bits-1 DOWNTO 0);
 	  q : OUT STD_LOGIC_VECTOR(addr_bits-1 DOWNTO 0));
@@ -42,9 +45,9 @@ END component;
 
 component memoriaROM is
       generic(
-          addr_width : integer := 16; -- quantidade de elementos a guardar
-          addr_bits  : integer := 4; -- tamanho de bits da contagem (que vem de REGPC)
-          data_width : integer := 8 -- numero de bits do elemento
+          addr_width : integer; -- quantidade de elementos a guardar
+          addr_bits  : integer; -- tamanho de bits da contagem (que vem de REGPC)
+          data_width : integer -- numero de bits do elemento
           );
   port(
       addr : in std_logic_vector(addr_bits-1 downto 0);
@@ -56,12 +59,12 @@ component memoriaROM is
 signal entradaA, entradaB, saidaPQ_sig, saidaS_sig, saidaMem_dados: std_logic_vector(N-1 downto 0);
 signal flag_OVF_sig, flag_Z_sig, flag_N_sig: std_logic;
 signal opcode_ula: std_logic_vector(N-1 downto 0);
-signal count_RegPC: std_logic_vector(3 downto 0); -- organizar generics, é addr bit, fazer um geralzao
+signal count_RegPC: std_logic_vector(addr_bits-1 downto 0); 
 
 
 begin
 
-      regPC: regPC generic map(N => 4)
+      regPC: regPC generic map(N => addr_bits)
       port map (
             d => count_RegPC,
             q => count_RegPC
@@ -155,7 +158,11 @@ begin
             q => flag_N
       );
 
-      memoria_dados: memoriaRom
+      memoria_dados: memoriaRom generic map(
+            addr_width => addr_width; -- quantidade de elementos a guardar
+            addr_bits => addr_bits; -- tamanho de bits da contagem (que vem de REGPC)
+            data_width => data_width
+      )
       port map (
             addr => count_RegPC,
             data => saidaMem_dados

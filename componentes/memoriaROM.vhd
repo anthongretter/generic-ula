@@ -19,9 +19,9 @@
   
   entity memoriaROM is
       generic(
-          addr_width : integer := 16; -- quantidade de elementos a guardar
-          addr_bits  : integer := 4; -- tamanho de bits da contagem (que vem de REGPC)
-          data_width : integer := 8 -- numero de bits do elemento
+          addr_width : integer; -- quantidade de elementos a guardar
+          addr_bits  : integer; -- tamanho de bits da contagem (que vem de REGPC)
+          data_width : integer -- numero de bits do elemento
           );
   port(
       addr : in std_logic_vector(addr_bits-1 downto 0);

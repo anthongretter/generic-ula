@@ -1,14 +1,14 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-entity bc_ula is
+entity BC_final is
     port (clk, Reset: in std_logic;
-          opcode_mem: in std_logic_vector(3 downto 0)
+          opcode_mem: in std_logic_vector(3 downto 0);
           pronto: in std_logic;
-          enPC, enA, enB, enOut, enOp: out std_logic);
-end bc_ula;
+          enPC, enA, enB, enOut, enOp, reset_bo: out std_logic);
+end BC_final;
 
-architecture estrutura of bc_ula is
+architecture estrutura of BC_final is
 	type state_type is (S0, S1, S2, S3, S4, S5, Halt);
 	signal state: state_type;
   signal opcode_salvo: std_logic_vector (3 downto 0);
@@ -22,7 +22,7 @@ begin
         case state is
           -- checa halt, salva opcode em nova variavel.
           when S0 =>
-            if (opcode_mem = '1111') then
+            if (opcode_mem = '1111') then -- OP HALT
               state <= Halt;
             else
               state <= S1;
@@ -30,9 +30,9 @@ begin
  =
           -- enA
           when S1 => 
-              if opcode_salvo = '0000' then
+              if opcode_salvo = '0000' then -- NO OPERATION
                 state <= S0;
-              elsif opcode_salvo = '0011' or opcode_salvo = '0100' or opcode_salvo = '0101' then -- NAO PRECISA DE B
+              elsif opcode_salvo = '0011' or opcode_salvo = '0100' or opcode_salvo = '0101' then -- TODAS OPERACOES QUE NAO PRECISAM DE B
                 state <= S3; -- operacoes monociclo
               end if;
 
@@ -79,6 +79,8 @@ begin
           enB <= '0';
           enOut <= '0';
           enOp <= '0';
+          reset_bo <= '0';
+
 
         when S1 = --enableA
           enPC <= '0';
@@ -87,6 +89,8 @@ begin
           enOut <= '0';
           enOp <= '0';
           opcode_salvo <= opcode_salvo;
+          reset_bo <= '0';
+
 
         when S2 => --enableB
           enPC <= '0';
@@ -95,6 +99,8 @@ begin
           enOut <= '0';
           enOp <= '1'; -- probleminha de começar a mult no estado s4 é q meu mult da pronto no s0
           opcode_salvo <= opcode_salvo;
+          reset_bo <= '0';
+
 
         when S3 => -- operacoes monociclo
           enPC <= '0';
@@ -103,6 +109,7 @@ begin
           enOut <= '0';
           enOp <= '1';
           opcode_salvo <= opcode_salvo;
+          reset_bo <= '0';
         
         when S4 => -- operacoes multiciclo
           enPC <= '0';
@@ -111,6 +118,7 @@ begin
           enOut <= '0';
           enOp <= '0';
           opcode_salvo <= opcode_salvo;
+          reset_bo <= '0';
         
         when S5 => 
           enPC <= '1';
@@ -119,6 +127,7 @@ begin
           enOut <= '1';
           enOp <= '0';
           opcode_salvo <= opcode_salvo;
+          reset_bo <= '0';
 
         when Halt => -- avaliar situacao
           enPC <= '0';
@@ -126,7 +135,7 @@ begin
           enB <= '0';
           enOut <= '0';
           enOp <= '0';
-
+          reset_bo <= '1'; -- reseta mult e todos regs do BO , exceto PC por enquanto
 
 		  end case;
     end process;
