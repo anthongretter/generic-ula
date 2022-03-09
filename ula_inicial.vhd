@@ -76,11 +76,8 @@ architecture arch of ula_inicial is
 			-- 1000: A xor B bit a bit
 			-- 1001: A * B
 			-- 1010: divisao inteira A/B
-			-- 1111: Halt??
+			-- 1111: Halt
 
-			-- COMENTÁRIO DO PROFESSOR NA AULA
-			-- o others da ula deve ser undefined: (others => 'U') when others;
-			-- para evitar latches inferidos
 			
 	begin
 		with op select
@@ -175,7 +172,7 @@ architecture arch of ula_inicial is
 		div: divisor generic map (N => N)
 		port map(
 			clk => clk,
-			reset => reset_div, --ver necessidade de signal sozinho
+			reset => reset_div, 
 			en => inicia_multi,
 			num => entradaA,
 			den => entradaB,

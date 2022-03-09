@@ -157,7 +157,7 @@ begin
 			 inicia_multi <= '0';
 			termina_op <= '0';
 
-        when Halt => -- avaliar situacao
+        when Halt => 
           enPC <= '0';
           enA <= '0';
           enB <= '0';

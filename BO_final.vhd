@@ -108,7 +108,7 @@ begin
       ula: ula_inicial generic map(N => N)
       port map(
             clk => clk,
-            reset => reset, --- o que isso ffaz?
+            reset => reset, 
             entradaA => entradaA, -- vem de mem dados
             entradaB => entradaB,
             op => opcode_ula(3 downto 0),
