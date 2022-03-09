@@ -28,7 +28,7 @@ architecture arc of divisor_grupo is
               entA, entB : in std_logic_vector(N - 1 downto 0);
               quociente : out std_logic_vector(N - 1 downto 0);
               resto : out std_logic_vector(N - 1 downto 0)); 
-  end component;
+    end component;
 
     -- sinais de saida bc
     signal carga_entradas, carga_quociente, carga_index, reset_saidas, reset_entradas : std_logic;
@@ -77,7 +77,7 @@ begin
         mux_index => mux_index,
         mux_resto => mux_resto,
         quociente => saida,
-        resto => resto,
+        resto => resto
     );
 
 end arc;
