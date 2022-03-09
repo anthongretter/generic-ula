@@ -30,11 +30,11 @@ begin
 					end if;
 				
                 res <= std_logic_vector(shift_left(unsigned(res), 1));
-                res(i) <= entA(i);
+                res(0) <= entA(i);
                 
                 if (res >= entB) then
                     res <= res - entB;
-                    quo(0) <= '1';
+                    quo(i) <= '1';
                 end if;
                 i := i - 1;
             end loop L;
