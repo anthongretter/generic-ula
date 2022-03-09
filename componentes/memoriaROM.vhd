@@ -1,10 +1,6 @@
---ROM_sevenSegment.vhd
 
 -- created by   :   Meher Krishna Patel
 -- date                 :   25-Dec-16
-
--- Functionality:
-  -- seven-segment display format for Hexadecimal values (i.e. 0-F) are stored in ROM 
 
 -- ports:
     -- addr             : input port for getting address
