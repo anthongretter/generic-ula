@@ -34,7 +34,7 @@ begin
                 
                 if (res >= entB) then
                     res <= res - entB;
-                    quo(i) <= '1';
+                    quo(0) <= '1';
                 end if;
                 i := i - 1;
             end loop L;
