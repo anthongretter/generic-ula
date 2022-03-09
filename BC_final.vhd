@@ -34,7 +34,7 @@ begin
               if opcode = "0000" then -- NO OPERATION
                 state <= Inicia;
               elsif opcode = "0011" or opcode = "0100" or opcode = "0101" then -- TODAS OPERACOES QUE NAO PRECISAM DE B
-                state <= S3; -- operacoes monociclo
+                state <= S4; -- operacoes monociclo
 					else 
 					state <= S2;
               end if;
