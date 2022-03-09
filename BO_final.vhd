@@ -11,7 +11,7 @@ entity BO_final is
       addr_bits  : integer); -- tamanho de bits da contagem (que vem de REGPC)
       port (
             clk : in std_logic;
-            enPC, enA, enB, enOut, enOp, reset: in std_logic;
+            enPC, enA, enB, enOut, enOp, reset, inicia_multi: in std_logic;
             pronto, flag_Z, flag_OVF, flag_N: out std_logic;
             PQ, S, opcode, mem_dados, A, B: out std_logic_vector(N-1 downto 0)); 
 end BO_final;
@@ -20,7 +20,7 @@ architecture estrutura of BO_final is
 -- componentes
 component ula_inicial is
 	generic(N: INTEGER);
-	port(clk, reset: in std_logic;
+	port(clk, reset, inicia_multi: in std_logic;
 		entradaA, entradaB: in std_logic_vector(N-1 downto 0);
 		op: in std_logic_vector(3 downto 0);
 		pronto, flag_OVF, flag_Z, flag_N: out std_logic;
@@ -117,7 +117,8 @@ begin
             flag_Z => flag_Z_sig,
             flag_N => flag_N_sig,
             saidaPQ => saidaPQ_sig,
-            saidaS => saidaS_sig
+            saidaS => saidaS_sig,
+				inicia_multi => inicia_multi
       );
 
 

@@ -9,7 +9,7 @@ entity bc_mult is
 end bc_mult;
 
 architecture estrutura of bc_mult is
-	type state_type is (S0, S1, S2, S3);
+	type state_type is (S0, S1, S2, S3, S4);
 	signal state: state_type;
 begin
     -- máquina de estados
@@ -35,13 +35,16 @@ begin
 
           when S2 =>
               if (B_zero = '1' or A_zero = '1') then
-                state <= S0;
+                state <= S4;
               else
                 state <= S3;
               end if;
           
           when S3 =>
                 state <= S2;
+          
+          when S4 =>
+                state <= S0;
 
         end case;
       end if;
@@ -54,8 +57,8 @@ begin
       -- conteúdo das variáveis de controle (decidindo carga dos flip-flops, etc para o BO)         	
 
         when S0 =>
-          pronto <= '1';
-			 carga_mult <= '0';
+          pronto <= '0';
+			    carga_mult <= '0';
 
         when S1 =>
           mux_mult <= '1';      -- reseta multiplicação
@@ -79,6 +82,10 @@ begin
           carga_mult <= '1';
 			    mux_mult <= '0';      -- regmult recebe a soma
           pronto <= '0';
+        
+        when S4 =>
+          pronto <= '1';
+          carga_mult <= '0';
 
 		  end case;
     end process;

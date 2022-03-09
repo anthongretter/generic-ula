@@ -5,7 +5,7 @@ entity BC_final is
     port (clk, Reset: in std_logic;
           opcode: in std_logic_vector(3 downto 0);
           pronto: in std_logic;
-          enPC, enA, enB, enOut, enOp, reset_bo: out std_logic);
+          enPC, enA, enB, enOut, enOp, reset_bo, inicia_multi: out std_logic);
 end BC_final;
 
 architecture estrutura of BC_final is
@@ -81,6 +81,7 @@ begin
           enOut <= '0';
           enOp <= '1';
           reset_bo <= '0';
+			 inicia_multi <= '0';
 			 
         when S0 =>
           enPC <= '1'; -- regpc pro proximo (A)
@@ -89,6 +90,7 @@ begin
           enOut <= '0';
           enOp <= '0';
           reset_bo <= '0';
+			 inicia_multi <= '0';
 
 
         when S1 => --enableA
@@ -98,6 +100,7 @@ begin
           enOut <= '0';
           enOp <= '0';
           reset_bo <= '0';
+			 inicia_multi <= '0';
 
 
 			 when S2 =>  -- +1reg pc prox estado caso precise B
@@ -107,7 +110,8 @@ begin
 				 enOut <= '0';
 				 enOp <= '0';
 				 reset_bo <= '0';
-				 
+				 inicia_multi <= '0';
+
         when S3 => --enableB
           enPC <= '0';
           enA <= '0';
@@ -115,6 +119,7 @@ begin
           enOut <= '0';
           enOp <= '0'; 
           reset_bo <= '0';
+			 inicia_multi <= '0';
 
 
         when S4 => -- operacoes monociclo
@@ -124,7 +129,8 @@ begin
           enOut <= '0';
           enOp <= '0';
           reset_bo <= '0';
-        
+        	inicia_multi <= '0';
+
         when S5 => -- operacoes multiciclo
           enPC <= '0';
           enA <= '0';
@@ -132,7 +138,8 @@ begin
           enOut <= '0';
           enOp <= '0';
           reset_bo <= '0';
-        
+			inicia_multi <= '1';
+
         when S6 =>  -- final: enpc e enout
           enPC <= '1';
           enA <= '0';
@@ -140,6 +147,8 @@ begin
           enOut <= '1';
           enOp <= '0';
           reset_bo <= '0';
+			 inicia_multi <= '0';
+
 
         when Halt => -- avaliar situacao
           enPC <= '0';
@@ -148,6 +157,7 @@ begin
           enOut <= '0';
           enOp <= '0';
           reset_bo <= '1'; -- reseta mult e todos regs do BO, exceto PC por enquanto
+				inicia_multi <= '0';
 
 		  end case;
     end process;

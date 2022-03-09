@@ -6,7 +6,7 @@ use ieee.std_logic_unsigned.all;
 
 entity ula_inicial is
 	generic(N: INTEGER);
-	port(clk, reset: in std_logic;
+	port(clk, reset, inicia_multi: in std_logic;
 		entradaA, entradaB: in std_logic_vector(N-1 downto 0);
 		op: in std_logic_vector(3 downto 0);
 		pronto, flag_OVF, flag_Z, flag_N: out std_logic;
@@ -49,7 +49,7 @@ architecture arch of ula_inicial is
 	signal saidaSoma, saiMuxEntradaB, saidaSub, saidaS_sig, saidaPQ_sig: std_logic_vector(N-1 downto 0);
 	signal um: std_logic_vector(N-2 downto 0) := (others => '0');
 	signal zero: std_logic_vector(N-1 downto 0) := (others => '0');
-	signal ovfSoma, ovfSub, inicia_mult: std_logic := '0';
+	signal ovfSoma, ovfSub, inicia_mult, reset_mult: std_logic := '0';
 	
 	
 			-- 0000: no operation
@@ -92,14 +92,15 @@ architecture arch of ula_inicial is
 					ovfSoma when "0011",
 					'0' when others;
 			with op select 
-				inicia_mult <= '1' when "1001",
-				'0' when others;
+				reset_mult <= '0' when "1001", '1' when others;
 			
 	flag_Z <= '1' when (saidaS_sig = zero) and (saidaPQ_sig = zero) else '0';
 	flag_N <= saidaS_sig(N-1); -- desativar isso em mult e div?
 	
 	saidaS <= saidaS_sig;
 	saidaPQ <= saidaPQ_sig;
+	inicia_mult <= inicia_multi;
+	
 	
 	-- somador COM SINAL
 	somaEntradas: somador_sinal generic map(N => N)
@@ -135,7 +136,7 @@ architecture arch of ula_inicial is
 		mult: multiplicador_grupo generic map(N => N)
 		port map (
 			clk => clk,
-			reset => reset,
+			reset => reset_mult,
 			inicio => inicia_mult,
 			pronto => pronto,
 			entA => entradaA,
