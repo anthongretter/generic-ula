@@ -7,9 +7,8 @@ end tb_projeto;
 
 architecture arch of tb_projeto is
 	constant CLK_PERIOD: time := 20ns;
-	signal clk, Reset, flagZ, flagN, flagOVF : std_logic := '0';
-	signal opcode: std_logic_vector(3 downto 0);
-	signal PQ, S, mem_dados, A, B: std_logic_vector(7 downto 0);
+	signal clk, Reset, flagZ, flagN, flagOVF, termina_op : std_logic := '0';
+	signal PQ, S: std_logic_vector(7 downto 0);
 begin
 
 	UUT: entity work.projeto
@@ -21,10 +20,7 @@ begin
 		flagZ => flagZ,
 		flagN => flagN,
 		flagOVF => flagOVF,
-		opcode => opcode,
-		mem_dados => mem_dados,
-		A => A,
-		B => B);
+		termina_op => termina_op);
 
 	-- clock
 	clk <= not clk after CLK_PERIOD;
