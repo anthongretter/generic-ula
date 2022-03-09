@@ -32,7 +32,7 @@ begin
           -- enA
           when S1 => 
               if opcode = "0000" then -- NO OPERATION
-                state <= S0;
+                state <= Inicia;
               elsif opcode = "0011" or opcode = "0100" or opcode = "0101" then -- TODAS OPERACOES QUE NAO PRECISAM DE B
                 state <= S3; -- operacoes monociclo
 					else 
@@ -156,8 +156,8 @@ begin
           enB <= '0';
           enOut <= '0';
           enOp <= '0';
-          reset_bo <= '1'; -- reseta mult e todos regs do BO, exceto PC por enquanto
-				inicia_multi <= '0';
+          reset_bo <= '1'; -- reseta mult e todos regs do BO
+			inicia_multi <= '0';
 
 		  end case;
     end process;

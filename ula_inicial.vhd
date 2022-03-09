@@ -45,11 +45,24 @@ architecture arch of ula_inicial is
         y : OUT STD_LOGIC_VECTOR(N-1 DOWNTO 0));
 	end component;
 	
+	component divisor is  
+    generic(N: INTEGER); 
+    port(reset: in STD_LOGIC; 
+        en: in STD_LOGIC; 
+        clk: in STD_LOGIC; 
+         
+        num: in STD_LOGIC_VECTOR((N - 1) downto 0); 
+        den: in STD_LOGIC_VECTOR((N - 1) downto 0); 
+        quociente: out STD_LOGIC_VECTOR((N - 1) downto 0); 
+        resto: out STD_LOGIC_VECTOR((N - 1) downto 0);
+		  pronto: out std_logic); 
+	end component; 
+
 	signal multSaidaSig: std_logic_vector((2*N)-1 downto 0);
-	signal saidaSoma, saiMuxEntradaB, saidaSub, saidaS_sig, saidaPQ_sig: std_logic_vector(N-1 downto 0);
+	signal saidaSoma, saiMuxEntradaB, saidaSub, saidaS_sig, saidaPQ_sig, quociente, resto: std_logic_vector(N-1 downto 0);
 	signal um: std_logic_vector(N-2 downto 0) := (others => '0');
 	signal zero: std_logic_vector(N-1 downto 0) := (others => '0');
-	signal ovfSoma, ovfSub, inicia_mult, reset_mult: std_logic := '0';
+	signal ovfSoma, ovfSub, inicia_mult, reset_mult, pronto_div, pronto_mult, reset_div: std_logic := '0';
 	
 	
 			-- 0000: no operation
@@ -81,9 +94,12 @@ architecture arch of ula_inicial is
 					entradaA or entradaB when "0111",
 					entradaA xor entradaB when "1000",
 					multSaidaSig(N-1 downto 0) when "1001",
+					resto when "1010",
 					zero when others;
+
 		with op select
 			saidaPQ_sig <= multSaidaSig((2*N)-1 downto N) when "1001",
+										quociente when "1010",
 						zero when others;
 		with op select -- qual sinal de ovf eu quero
 			flag_OVF <= ovfSub when "0010",
@@ -91,11 +107,23 @@ architecture arch of ula_inicial is
 					ovfSoma when "0001",
 					ovfSoma when "0011",
 					'0' when others;
+		with op select
+			flag_N <= '0' when "1001",
+			'0' when "1010",
+			saidaS_sig(N-1) when others;
+
 			with op select 
 				reset_mult <= '0' when "1001", '1' when others;
+
+			with op select
+				reset_div <= '0' when "1010", '1' when others;
+				
+			with op select
+				pronto <= pronto_mult when "1001",
+				pronto_div when "1010",
+				'0' when others;
 			
 	flag_Z <= '1' when (saidaS_sig = zero) and (saidaPQ_sig = zero) else '0';
-	flag_N <= saidaS_sig(N-1); -- desativar isso em mult e div?
 	
 	saidaS <= saidaS_sig;
 	saidaPQ <= saidaPQ_sig;
@@ -138,10 +166,22 @@ architecture arch of ula_inicial is
 			clk => clk,
 			reset => reset_mult,
 			inicio => inicia_mult,
-			pronto => pronto,
+			pronto => pronto_mult,
 			entA => entradaA,
 			entB => entradaB,
 			saida => multSaidaSig
+		);
+
+		div: divisor generic map (N => N)
+		port map(
+			clk => clk,
+			reset => reset_div, --ver necessidade de signal sozinho
+			en => inicia_multi,
+			num => entradaA,
+			den => entradaB,
+			quociente => quociente,
+			resto => resto,
+			pronto => pronto_div
 		);
 	
 end arch;
