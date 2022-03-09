@@ -3,8 +3,9 @@ use ieee.std_logic_1164.all;
 
 entity bc_div is
     port (Reset, clk, inicio : in std_logic;
-        index_zero, divisor_zero, resto_maiorigual: in std_logic;
-        carga_entradas, carga_quociente, reset_saidas: out std_logic;
+        index_menosum, divisor_zero, resto_maiorigual: in std_logic;
+        carga_entradas, carga_quociente, carga_index, reset_saidas, reset_entradas: out std_logic;
+        mux_index, mux_resto : out std_logic;
         pronto, erro: out std_logic);
 end bc_div;
 
@@ -42,7 +43,7 @@ begin
 
           -- estado de check e incremento do resto
           when S2 =>
-              if (index_zero = '1') then
+              if (index_menosum = '1') then
                 state <= S0;
               elsif (divisor_zero = '1') then
                 state <= E;
@@ -76,18 +77,24 @@ begin
 
         when S1 =>
           reset_saidas <= '1';      -- reseta saidas (quociente e resto)
+          mux_index <= '0';         -- seta index para N
+          carga_index <= '1';       -- atualiza index
           carga_entradas <= '1';    -- atualiza os valores de A e B (entA e entB)
           carga_quociente <= '1';   -- atualiza valor do quociente (reseta valor)
           pronto <= '0';
 
         when S2 =>
           reset_saidas <= '0';      -- mantem saidas
+          mux_index <= '1';         -- index recebe index-1
+          mux_resto <= '0';         -- resto recebe set_bit
+          carga_index <= '1';
           carga_entradas <= '0';    -- mantem os valores de dividendo e divisor
           carga_quociente <= '0';   -- mantem valor do quociente
           pronto <= '0';
 
         when S3 =>
           reset_saidas <= '0';
+          carga_index <= '0';       -- mantem index
           carga_entradas <= '0';
           carga_quociente <= '1';   -- atualiza valor do quociente
           pronto <= '0';

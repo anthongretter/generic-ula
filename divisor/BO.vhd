@@ -5,24 +5,14 @@ use ieee.numeric_std.all;
 
 entity bo_div is
       generic (N : integer);
-      port (clk, carga_entradas, carga_quociente, reset_res : in std_logic;
-            divisor_zero, resto_maiorigual : out std_logic;
+      port (clk, carga_entradas, carga_quociente, carga_index, reset_saidas, reset_entradas : in std_logic;
+            index_menosum, divisor_zero, resto_maiorigual : out std_logic;
+            mux_index, mux_resto : in std_logic;
             entA, entB : in std_logic_vector(N - 1 downto 0);
             quociente : out std_logic_vector(N - 1 downto 0);
-            resto : out std_logic_vector(N - 2 downto 0)); 
+            resto : out std_logic_vector(N - 1 downto 0)); 
 end bo_div;
 architecture estrutura of bo_div is
-      
-      -- altera um bit de um vetor
-      function set_bit (v : in std_logic_vector(N - 1 downto 0),
-                        index : in integer, bit : in std_logic) return std_logic_vector is
-
-            variable sv : std_logic_vector(N - 1 downto 0);
-      begin 
-            sv <= v;
-            sv[index] <= bit;
-            return sv;
-      end set_bit;
 
       component registrador is
             generic (N : integer);
@@ -40,16 +30,18 @@ architecture estrutura of bo_div is
 
       component mux2para1 is
             generic (N : integer);
-            port (a, b : in std_logic_vector(N - 1 downto 0);
+            port (a, b : in std_logic_vector(N-1 downto 0);
                   sel : in std_logic;
-                  y : out std_logic_vector(N - 1 downto 0));
+                  y : out std_logic_vector(N-1 downto 0));
       end component;
 
-      component somador is
-            generic(N: integer);
-            port(A, B: in std_logic_vector(N-1 downto 0);
-                  S: out std_logic_vector(N-1 downto 0));
-      end component;
+      component setbit is
+            generic (N : integer);
+            port (v : in std_logic_vector(N-1 downto 0);
+                  s : out std_logic_vector(N-1 downto 0);
+                  index : integer;
+                  b : std_logic);
+        end component;
 
       component subtrator is
             generic (N: integer);
@@ -63,13 +55,26 @@ architecture estrutura of bo_div is
                   igual : out std_logic);
       end component;
 
-      signal ZERO : std_logic_vector(N - 1 downto 0) := (others => '0');
-      signal saireg_dividendo, saireg_divisor, saireg_quo: std_logic_vector(N - 1 downto 0);
-      signal saireg_res: std_logic_vector(N - 2 downto 0);
+      component maiorigual IS
+            generic (N : integer);
+            port (a, b : in std_logic_vector(N-1 downto 0);
+                  maiorigual : out std_logic);
+      end component;
+
+      component fimindex IS
+            generic (N : integer);
+            port (a: integer;
+                  fim : out std_logic);
+      end component;
+
+      signal ZERO_A_MENOS : std_logic_vector(N - 2 downto 0) := (others => '0');
+      signal saireg_dividendo, saireg_divisor, saireg_quo, saireg_res : std_logic_vector(N - 1 downto 0);
+      signal saimux_index , saisub_resto, saisub_index : std_logic_vecotr(N - 1 downto 0);
 
 begin
 
-      -- Registradores
+      -- REGISTRADORES
+      -- entradas:
 
       REG_DIVIDENDO : registrador generic map (N => N)
       port map
@@ -89,57 +94,123 @@ begin
             q => saireg_divisor
       );
 
+      -- saidas:
+
       REG_QUOCIENTE : registrador_r generic map (N => N)
       port map
       (
             clk => clk,
             carga => carga_quociente,
             reset => reset_saidas,
-            d => saimuxB,
+            d => saiset_quociente,
             q => saireg_quo
       );
 
-      REG_RESTO : registrador_r generic map (N => N-1)
+      REG_RESTO : registrador_r generic map (N => N)
       port map
       (
             clk => clk,
-            carga => carga_div,
+            carga => carga_index,
             reset => reset_saidas,
-            d => saimuxdiv,
+            d => saimux_resto,
             q => saireg_res
       );
 
-      -- soma: somador generic map (N => 2*N)
-      -- port map
-      -- (
-      --       A => sairegdiv,
-      --       B => std_logic_vector(shift_left(unsigned(sairegA), quant_zero)),
-      --       S => saiSoma
-      -- );
+      -- index:
 
-      -- sub: subtrator generic map(N => 2*N)
-      -- port map
-      -- (
-      --       A => sairegB,
-      --       B => std_logic_vector(shift_left(unsigned(zero_um &'1'), quant_zero)),
-      --       S => saiSub
-      -- );
+      REG_INDEX : registrador generic map (N => N)
+      port map
+      (
+            clk => clk,
+            carga => carga_index,
+            d => saimux_index,
+            q => saireg_index
+      );
 
-      -- Teste (sinais de status)
+      -- MUXES
+      -- index:
 
-	TESTA_DIVISOR: igualazero generic map (N => N) 
+      MUX_INDEX : mux2para1 generic map (N => N)
+      port map
+      (
+            a => std_logic_vector(unsigned(N)),
+            b => saireg_index,
+            sel => mux_index,
+            y => saimux_index
+      );
+      
+      -- resto
+
+      MUX_RESTO : mux2para1 generic map (N => N)
+      port map
+      (
+            a => saiset_resto,
+            b => saisub_resto,
+            sel => mux_resto,
+            y => saimux_resto
+      );
+
+     -- OPERAÇÔES
+     -- subtrações:
+
+     SUB_INDEX : subtrator generic map (N => N)
+     port map
+     (
+            A => saimux_index,
+            B => ZERO_A_MENOS&'1',
+            S => saisub_index
+     );
+
+     SUB_RESTO : subtrator generic map (N => N)
+     port map
+     (
+            A => saireg_resto,
+            B => saireg_divisor,
+            S => saisub_resto
+     );
+
+     -- set bit:
+
+     SET_RESTO : setbit generic map (N => N)
+     port map
+     (
+            v => std_logic_vector(shift_left(unsigned(saireg_resto), 1)),
+            s => saiset_resto,
+            index => 0,
+            b => saireg_dividendo(to_integer(unsigned(saireg_index)))
+     );
+
+     SET_QUOCIENTE : setbit generic map (N => N)
+     port map
+     (
+            v => saireg_quociente,
+            s => saiset_quociente,
+            index => to_integer(unsigned(saireg_index)),
+            b => '1'
+     );
+
+     -- TESTES (SINAIS DE STATUS)
+
+	TESTA_DIVISOR : igualazero generic map (N => N) 
       port map 
       (
             a => saireg_divisor,
-            igual => Az
+            igual => divisor_zero
       );
 
-      TESTA_RESTO: maiorigual generic map (N => N)
+      TESTA_RESTO : maiorigual generic map (N => N)
       port map
       (
             a => saireg_resto,
             b => saireg_divisor,
             maiorigual => resto_maiorigual
+      );
+
+      TESTA_INDEX : fimindex generic map (N => N)
+      port map
+      (
+            a => saireg,
+            fim => index_menosum
       );
 
 end estrutura;
